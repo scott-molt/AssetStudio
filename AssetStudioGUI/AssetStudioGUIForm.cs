@@ -123,8 +123,17 @@ namespace AssetStudioGUI
             var openFolderDialog1 = new OpenFolderDialog();
             if (openFolderDialog1.ShowDialog(this) == DialogResult.OK)
             {
+				// Clear file stats
+
                 var files = Directory.GetFiles(openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories);
-                ExtractFile(files);
+				foreach(var file in files)
+				{
+					if ( file.Contains( ".manifest" ) ) continue;
+
+					// Get stats for this file
+				}
+
+				// Print file stats
             }
         }
 
@@ -133,8 +142,9 @@ namespace AssetStudioGUI
 			var openFolderDialog = new OpenFolderDialog();
 			if (openFolderDialog.ShowDialog(this) == DialogResult.OK)
 			{
-				var files = Directory.GetFiles( openFolderDialog.Folder, "" );
-				Debug.Write( string.Format( "Found {0} bundles", files.Length ) );
+				var files = Directory.GetFiles( openFolderDialog.Folder, "*.*", SearchOption.AllDirectories );
+
+				Debug.Write( string.Format( "Found {0} files", files.Length ) );
 			}
 		}
 
