@@ -134,8 +134,30 @@ namespace AssetStudioGUI
 				}
 
 				// Print file stats
+				Dictionary<string, long> types = new Dictionary<string, long>();
+				List<string> typesList = new List<string>( types.Keys );
+				List<long> sizeList = new List<long>( types.Values );
+
+				// Insertion sort both at once by size
+				int i = 1;
+				while( i < sizeList.Count )
+				{
+					int j = i;
+					while ( j > 0 && sizeList[j-1] > sizeList[ j ] )
+					{
+						Swap( typesList, j, j - 1 );
+						Swap( sizeList, j, j - 1 );
+						j--;
+					}
+				}
             }
         }
+		void Swap<T>( List<T> list, int a, int b )
+		{
+			T tmp = list[a];
+			list[ a ] = list[ b ];
+			list[ b ] = tmp;
+		}
 
 		private void filesizeByTypeInFolderToolStripMenuItem_Click(object sender, EventArgs e)
 		{
