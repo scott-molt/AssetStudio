@@ -128,6 +128,16 @@ namespace AssetStudioGUI
             }
         }
 
+		private void filesizeByTypeInFolderToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			var openFolderDialog = new OpenFolderDialog();
+			if (openFolderDialog.ShowDialog(this) == DialogResult.OK)
+			{
+				var files = Directory.GetFiles( openFolderDialog.Folder, "" );
+				Debug.Write( string.Format( "Found {0} bundles", files.Length ) );
+			}
+		}
+
         private void BuildAssetStructures()
         {
             if (assetsManager.assetsFileList.Count == 0)

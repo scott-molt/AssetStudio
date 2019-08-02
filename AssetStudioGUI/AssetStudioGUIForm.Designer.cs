@@ -37,7 +37,9 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.extractFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.extractFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+			this.filesizeByTypeInFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.displayAll = new System.Windows.Forms.ToolStripMenuItem();
             this.displayOriginalName = new System.Windows.Forms.ToolStripMenuItem();
             this.enablePreview = new System.Windows.Forms.ToolStripMenuItem();
@@ -157,7 +159,10 @@
             this.loadFolderToolStripMenuItem,
             this.toolStripMenuItem1,
             this.extractFileToolStripMenuItem,
-            this.extractFolderToolStripMenuItem});
+            this.extractFolderToolStripMenuItem,
+			this.toolStripMenuItem2,
+			this.filesizeByTypeInFolderToolStripMenuItem
+			} );
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(39, 21);
             this.fileToolStripMenuItem.Text = "File";
@@ -194,10 +199,22 @@
             this.extractFolderToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.extractFolderToolStripMenuItem.Text = "Extract folder";
             this.extractFolderToolStripMenuItem.Click += new System.EventHandler(this.extractFolderToolStripMenuItem_Click);
-            // 
-            // optionsToolStripMenuItem
-            // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			//
+			// toolStripMenuItem2
+			//
+			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+			this.toolStripMenuItem2.Size = new System.Drawing.Size( 151, 6 );
+			//
+			// filesizeByTypeInFolderToolStripMenuItem
+			//
+			this.filesizeByTypeInFolderToolStripMenuItem.Name = "filesizeByTypeInFolderToolStripMenuItem";
+			this.filesizeByTypeInFolderToolStripMenuItem.Size = new System.Drawing.Size( 154, 22 );
+			this.filesizeByTypeInFolderToolStripMenuItem.Text = "Filesize by Type in folder";
+			this.filesizeByTypeInFolderToolStripMenuItem.Click += new System.EventHandler( this.filesizeByTypeInFolderToolStripMenuItem_Click );
+			// 
+			// optionsToolStripMenuItem
+			// 
+			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.displayAll,
             this.displayOriginalName,
             this.enablePreview,
@@ -1058,7 +1075,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem extractFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem extractFolderToolStripMenuItem;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
+		private System.Windows.Forms.ToolStripMenuItem filesizeByTypeInFolderToolStripMenuItem;
+		private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.ToolStripComboBox assetGroupOptions;
         private System.Windows.Forms.ToolStripMenuItem openAfterExport;
