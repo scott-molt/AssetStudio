@@ -123,33 +123,50 @@ namespace AssetStudioGUI
             var openFolderDialog1 = new OpenFolderDialog();
             if (openFolderDialog1.ShowDialog(this) == DialogResult.OK)
             {
-				// Clear file stats
+                // Clear file stats
+                Studio.sizeByAssetType.Clear();
 
                 var files = Directory.GetFiles(openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories);
 				foreach(var file in files)
 				{
 					if ( file.Contains( ".manifest" ) ) continue;
 
-					// Get stats for this file
-				}
+                    // Get stats for this file
+                    ResetForm();
+                    ThreadPool.QueueUserWorkItem(state =>
+                    {
+                        assetsManager.LoadFiles(openFileDialog1.FileNames);
+                        BuildAssetStructures();
+                    });
+
+                }
 
 				// Print file stats
-				Dictionary<string, long> types = new Dictionary<string, long>();
-				List<string> typesList = new List<string>( types.Keys );
-				List<long> sizeList = new List<long>( types.Values );
+				List<string> types = new List<string>( Studio.sizeByAssetType.Keys );
+				List<long> sizes = new List<long>( Studio.sizeByAssetType.Values );
 
 				// Insertion sort both at once by size
 				int i = 1;
-				while( i < sizeList.Count )
+				while( i < sizes.Count )
 				{
 					int j = i;
-					while ( j > 0 && sizeList[j-1] > sizeList[ j ] )
+					while ( j > 0 && sizes[j-1] > sizes[ j ] )
 					{
-						Swap( typesList, j, j - 1 );
-						Swap( sizeList, j, j - 1 );
+						Swap( types, j, j - 1 );
+						Swap( sizes, j, j - 1 );
 						j--;
 					}
 				}
+
+				string str = "";
+				long totalSize = 0;
+                for( int j=0; j<sizes.Count; j++ )
+                {
+                    str += types[j] + ": " + sizes[j] +"\n";
+					totalSize += sizes[ j ];
+				}
+				str += "Total Size: " + totalSize;
+				Console.Write( str );
             }
         }
 		void Swap<T>( List<T> list, int a, int b )
