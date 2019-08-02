@@ -120,26 +120,36 @@ namespace AssetStudioGUI
 
         private void extractFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var openFolderDialog1 = new OpenFolderDialog();
-            if (openFolderDialog1.ShowDialog(this) == DialogResult.OK)
-            {
-                // Clear file stats
-                Studio.sizeByAssetType.Clear();
+			var openFolderDialog1 = new OpenFolderDialog();
+			if ( openFolderDialog1.ShowDialog( this ) == DialogResult.OK )
+			{
+				var files = Directory.GetFiles( openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories );
+				ExtractFile( files );
+			}
+		}
 
-                var files = Directory.GetFiles(openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories);
-				foreach(var file in files)
+		private void filesizeByTypeInFolderToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			var openFolderDialog1 = new OpenFolderDialog();
+			if ( openFolderDialog1.ShowDialog( this ) == DialogResult.OK )
+			{
+				// Clear file stats
+				Studio.sizeByAssetType.Clear();
+
+				var files = Directory.GetFiles( openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories );
+				foreach ( var file in files )
 				{
 					if ( file.Contains( ".manifest" ) ) continue;
 
-                    // Get stats for this file
-                    ResetForm();
-                    ThreadPool.QueueUserWorkItem(state =>
-                    {
-                        assetsManager.LoadFiles(openFileDialog1.FileNames);
-                        BuildAssetStructures();
-                    });
+					// Get stats for this file
+					ResetForm();
+					ThreadPool.QueueUserWorkItem( state =>
+					{
+						assetsManager.LoadFiles( openFileDialog1.FileNames );
+						BuildAssetStructures();
+					} );
 
-                }
+				}
 
 				// Print file stats
 				List<string> types = new List<string>( Studio.sizeByAssetType.Keys );
@@ -147,10 +157,10 @@ namespace AssetStudioGUI
 
 				// Insertion sort both at once by size
 				int i = 1;
-				while( i < sizes.Count )
+				while ( i < sizes.Count )
 				{
 					int j = i;
-					while ( j > 0 && sizes[j-1] > sizes[ j ] )
+					while ( j > 0 && sizes[ j - 1 ] > sizes[ j ] )
 					{
 						Swap( types, j, j - 1 );
 						Swap( sizes, j, j - 1 );
@@ -160,34 +170,23 @@ namespace AssetStudioGUI
 
 				string str = "";
 				long totalSize = 0;
-                for( int j=0; j<sizes.Count; j++ )
-                {
-                    str += types[j] + ": " + sizes[j] +"\n";
+				for ( int j = 0; j < sizes.Count; j++ )
+				{
+					str += types[ j ] + ": " + sizes[ j ] + "\n";
 					totalSize += sizes[ j ];
 				}
 				str += "Total Size: " + totalSize;
 				Console.Write( str );
-            }
-        }
+			}
+		}
 		void Swap<T>( List<T> list, int a, int b )
 		{
-			T tmp = list[a];
+			T tmp = list[ a ];
 			list[ a ] = list[ b ];
 			list[ b ] = tmp;
 		}
 
-		private void filesizeByTypeInFolderToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			var openFolderDialog = new OpenFolderDialog();
-			if (openFolderDialog.ShowDialog(this) == DialogResult.OK)
-			{
-				var files = Directory.GetFiles( openFolderDialog.Folder, "*.*", SearchOption.AllDirectories );
-
-				Debug.Write( string.Format( "Found {0} files", files.Length ) );
-			}
-		}
-
-        private void BuildAssetStructures()
+		private void BuildAssetStructures()
         {
             if (assetsManager.assetsFileList.Count == 0)
             {
