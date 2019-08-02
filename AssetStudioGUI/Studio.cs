@@ -19,6 +19,9 @@ namespace AssetStudioGUI
         public static List<AssetItem> exportableAssets = new List<AssetItem>();
         public static List<AssetItem> visibleAssets = new List<AssetItem>();
 
+        public static Dictionary<string, long> sizeByAssetType = new Dictionary<string, long>();
+
+
         public static void ExtractFile(string[] fileNames)
         {
             ThreadPool.QueueUserWorkItem(state =>
@@ -205,6 +208,16 @@ namespace AssetStudioGUI
                         tempExportableAssets.Add(assetItem);
                     }
 
+                    //Add to dictionary
+                    if(sizeByAssetType.ContainsKey(assetItem.TypeString))
+                    {
+                        sizeByAssetType[assetItem.TypeString] += assetItem.FullSize;
+                    }
+                    else
+                    {
+                        sizeByAssetType.Add(assetItem.TypeString, assetItem.FullSize);
+                    }
+
                     Progress.Report(++j, progressCount);
                 }
                 if (displayOriginalName && ab != null)
@@ -233,6 +246,7 @@ namespace AssetStudioGUI
             }
 
             visibleAssets = exportableAssets;
+
             assetsNameHash.Clear();
         }
 

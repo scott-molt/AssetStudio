@@ -123,17 +123,31 @@ namespace AssetStudioGUI
             var openFolderDialog1 = new OpenFolderDialog();
             if (openFolderDialog1.ShowDialog(this) == DialogResult.OK)
             {
-				// Clear file stats
+                // Clear file stats
+                Studio.sizeByAssetType.Clear();
 
                 var files = Directory.GetFiles(openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories);
 				foreach(var file in files)
 				{
 					if ( file.Contains( ".manifest" ) ) continue;
 
-					// Get stats for this file
-				}
+                    // Get stats for this file
+                    ResetForm();
+                    ThreadPool.QueueUserWorkItem(state =>
+                    {
+                        assetsManager.LoadFiles(openFileDialog1.FileNames);
+                        BuildAssetStructures();
+                    });
+
+                }
 
 				// Print file stats
+                foreach(string s in Studio.sizeByAssetType.Keys)
+                {
+                    Console.WriteLine(s + ": " + Studio.sizeByAssetType[s]);
+                }
+
+
             }
         }
 
