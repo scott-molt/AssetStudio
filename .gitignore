@@ -209,3 +209,4 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 AssetStudioFBX/AssetStudioFBX.vcxproj
+*.vcxproj
