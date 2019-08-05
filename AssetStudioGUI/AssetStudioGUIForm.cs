@@ -136,6 +136,7 @@ namespace AssetStudioGUI
 			{
 				// Clear file stats
 				Studio.sizeByAssetType.Clear();
+                Studio.objectNames.Clear();
 
 				var files = Directory.GetFiles( openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories );
 				ProcessFiles( files );
@@ -183,6 +184,7 @@ namespace AssetStudioGUI
 					Swap( sizes, j, j - 1 );
 					j--;
 				}
+                i++;
 			}
 
 			string str = "";
