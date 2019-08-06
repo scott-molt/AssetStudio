@@ -18,6 +18,11 @@ namespace AssetStudioGUI
         public static ScriptDumper scriptDumper = new ScriptDumper();
         public static List<AssetItem> exportableAssets = new List<AssetItem>();
         public static List<AssetItem> visibleAssets = new List<AssetItem>();
+        public static HashSet<string> objectNames = new HashSet<string>();
+
+
+        public static Dictionary<string, long> sizeByAssetType = new Dictionary<string, long>();
+
 
         public static void ExtractFile(string[] fileNames)
         {
@@ -205,6 +210,23 @@ namespace AssetStudioGUI
                         tempExportableAssets.Add(assetItem);
                     }
 
+
+
+                    //Add to dictionary
+                    string obj = assetItem.Text + "_" + assetItem.TypeString;
+                    if (!objectNames.Contains(obj))
+                    {
+                        objectNames.Add(obj);
+                        if (sizeByAssetType.ContainsKey(assetItem.TypeString))
+                        {
+                            sizeByAssetType[assetItem.TypeString] += assetItem.FullSize;
+                        }
+                        else
+                        {
+                            sizeByAssetType.Add(assetItem.TypeString, assetItem.FullSize);
+                        }
+                    }
+
                     Progress.Report(++j, progressCount);
                 }
                 if (displayOriginalName && ab != null)
@@ -233,6 +255,7 @@ namespace AssetStudioGUI
             }
 
             visibleAssets = exportableAssets;
+
             assetsNameHash.Clear();
         }
 
@@ -351,7 +374,9 @@ namespace AssetStudioGUI
 
         public static string FixFileName(string str)
         {
-            if (str.Length >= 260) return Path.GetRandomFileName();
+            //if (str.Length >= 260) return Path.GetRandomFileName();
+
+            if (str.Length >= 260) return str.Substring(0, 255);
             return Path.GetInvalidFileNameChars().Aggregate(str, (current, c) => current.Replace(c, '_'));
         }
 

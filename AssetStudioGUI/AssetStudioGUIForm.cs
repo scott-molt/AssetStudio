@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
@@ -120,15 +121,111 @@ namespace AssetStudioGUI
 
         private void extractFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var openFolderDialog1 = new OpenFolderDialog();
-            if (openFolderDialog1.ShowDialog(this) == DialogResult.OK)
-            {
-                var files = Directory.GetFiles(openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories);
-                ExtractFile(files);
-            }
-        }
+			var openFolderDialog1 = new OpenFolderDialog();
+			if ( openFolderDialog1.ShowDialog( this ) == DialogResult.OK )
+			{
+				var files = Directory.GetFiles( openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories );
+				ExtractFile( files );
+			}
+		}
 
-        private void BuildAssetStructures()
+		private void filesizeByTypeInFolderToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			var openFolderDialog1 = new OpenFolderDialog();
+			if ( openFolderDialog1.ShowDialog( this ) == DialogResult.OK )
+			{
+				// Clear file stats
+				Studio.sizeByAssetType.Clear();
+                Studio.objectNames.Clear();
+
+				var files = Directory.GetFiles( openFolderDialog1.Folder, "*.*", SearchOption.AllDirectories );
+				ProcessFiles( files );
+			}
+		}
+
+		// Must control program flow so that only one asset processes at a time, and wait till all are processed
+		// One at a time
+		//Semaphore oneBundleSemaphore;
+		// All must finish
+		//CountdownEvent allBundlesCountdown;
+
+		async Task ProcessFiles( string[] files )
+		{
+
+			List<string> toProcessFiles = new List<string>();
+			foreach ( var file in files )
+			{
+				if ( file.Contains( ".manifest" ) == false )
+					toProcessFiles.Add( file );
+			}
+
+			//allBundlesCountdown = new CountdownEvent( toProcessFiles.Count );
+			//oneBundleSemaphore = new Semaphore( 1, 1 );
+			foreach ( var file in toProcessFiles )
+			{
+				await ProcessFile( file );
+			}
+
+			// Wait for all bundles
+			//allBundlesCountdown.Wait();
+
+			// Print file stats
+			List<string> types = new List<string>( Studio.sizeByAssetType.Keys );
+			List<long> sizes = new List<long>( Studio.sizeByAssetType.Values );
+
+			// Insertion sort both at once by size
+			int i = 1;
+			while ( i < sizes.Count )
+			{
+				int j = i;
+				while ( j > 0 && sizes[ j - 1 ] > sizes[ j ] )
+				{
+					Swap( types, j, j - 1 );
+					Swap( sizes, j, j - 1 );
+					j--;
+				}
+                i++;
+			}
+
+			string str = "";
+			long totalSize = 0;
+			for ( int j = 0; j < sizes.Count; j++ )
+			{
+				str += types[ j ] + ": " + sizes[ j ] + "\n";
+				totalSize += sizes[ j ];
+			}
+			str += "Total Size: " + totalSize;
+			Debug.WriteLine( str );
+		}
+
+		async Task ProcessFile ( string file )
+		{
+
+			// Get stats for this file
+			ResetForm();
+
+			//ThreadPool.QueueUserWorkItem( state =>
+			{
+				// Each worker thread begins by requesting the
+				// semaphore.
+				Console.WriteLine( "Thread '{0}' queues.", file );
+				//oneBundleSemaphore.WaitOne();
+				//Console.WriteLine( "Thread '{0}' enters the semaphore.", file );
+
+				assetsManager.LoadFiles( new string[] { file } );
+				await BuildAssetStructures();
+			}
+			//);
+		}
+		void Swap<T>( List<T> list, int a, int b )
+		{
+			T tmp = list[ a ];
+			list[ a ] = list[ b ];
+			list[ b ] = tmp;
+		}
+
+		
+		async Task BuildAssetStructures()
         {
             if (assetsManager.assetsFileList.Count == 0)
             {
@@ -156,68 +253,86 @@ namespace AssetStudioGUI
                 typeMap = BuildClassStructure();
             }
 
-            BeginInvoke(new Action(() =>
-            {
-                if (!string.IsNullOrEmpty(productName))
-                {
-                    Text = $"AssetStudioGUI - {productName} - {assetsManager.assetsFileList[0].unityVersion} - {assetsManager.assetsFileList[0].m_TargetPlatform}";
-                }
-                else
-                {
-                    Text = $"AssetStudioGUI - no productName - {assetsManager.assetsFileList[0].unityVersion} - {assetsManager.assetsFileList[0].m_TargetPlatform}";
-                }
-                if (!dontLoadAssetsMenuItem.Checked)
-                {
-                    assetListView.VirtualListSize = visibleAssets.Count;
-                    resizeAssetListColumns();
-                }
-                if (!dontBuildHierarchyMenuItem.Checked)
-                {
-                    sceneTreeView.BeginUpdate();
-                    sceneTreeView.Nodes.AddRange(treeNodeCollection.ToArray());
-                    treeNodeCollection.Clear();
-                    foreach (TreeNode node in sceneTreeView.Nodes)
-                    {
-                        node.HideCheckBox();
-                    }
-                    sceneTreeView.EndUpdate();
-                }
-                if (buildClassStructuresMenuItem.Checked)
-                {
-                    classesListView.BeginUpdate();
-                    foreach (var version in typeMap)
-                    {
-                        var versionGroup = new ListViewGroup(version.Key);
-                        classesListView.Groups.Add(versionGroup);
+			
+			IAsyncResult async = BeginInvoke( new Action( () =>
+			{
+				if ( !string.IsNullOrEmpty( productName ) )
+				{
+					Text = $"AssetStudioGUI - {productName} - {assetsManager.assetsFileList[ 0 ].unityVersion} - {assetsManager.assetsFileList[ 0 ].m_TargetPlatform}";
+				}
+				else
+				{
+					Text = $"AssetStudioGUI - no productName - {assetsManager.assetsFileList[ 0 ].unityVersion} - {assetsManager.assetsFileList[ 0 ].m_TargetPlatform}";
+				}
+				if ( !dontLoadAssetsMenuItem.Checked )
+				{
+					assetListView.VirtualListSize = visibleAssets.Count;
+					resizeAssetListColumns();
+				}
+				if ( !dontBuildHierarchyMenuItem.Checked )
+				{
+					sceneTreeView.BeginUpdate();
+					sceneTreeView.Nodes.AddRange( treeNodeCollection.ToArray() );
+					treeNodeCollection.Clear();
+					foreach ( TreeNode node in sceneTreeView.Nodes )
+					{
+						node.HideCheckBox();
+					}
+					sceneTreeView.EndUpdate();
+				}
+				if ( buildClassStructuresMenuItem.Checked )
+				{
+					classesListView.BeginUpdate();
+					foreach ( var version in typeMap )
+					{
+						var versionGroup = new ListViewGroup( version.Key );
+						classesListView.Groups.Add( versionGroup );
 
-                        foreach (var uclass in version.Value)
-                        {
-                            uclass.Value.Group = versionGroup;
-                            classesListView.Items.Add(uclass.Value);
-                        }
-                    }
-                    typeMap.Clear();
-                    classesListView.EndUpdate();
-                }
+						foreach ( var uclass in version.Value )
+						{
+							uclass.Value.Group = versionGroup;
+							classesListView.Items.Add( uclass.Value );
+						}
+					}
+					typeMap.Clear();
+					classesListView.EndUpdate();
+				}
 
-                var types = exportableAssets.Select(x => x.Type).Distinct().OrderBy(x => x.ToString()).ToArray();
-                foreach (var type in types)
-                {
-                    var typeItem = new ToolStripMenuItem
-                    {
-                        CheckOnClick = true,
-                        Name = type.ToString(),
-                        Size = new Size(180, 22),
-                        Text = type.ToString()
-                    };
-                    typeItem.Click += typeToolStripMenuItem_Click;
-                    filterTypeToolStripMenuItem.DropDownItems.Add(typeItem);
-                }
-                allToolStripMenuItem.Checked = true;
-                StatusStripUpdate($"Finished loading {assetsManager.assetsFileList.Count} files with {assetListView.Items.Count} exportable assets.");
-                treeSearch.Select();
-            }));
-        }
+				var types = exportableAssets.Select( x => x.Type ).Distinct().OrderBy( x => x.ToString() ).ToArray();
+				foreach ( var type in types )
+				{
+					var typeItem = new ToolStripMenuItem
+					{
+						CheckOnClick = true,
+						Name = type.ToString(),
+						Size = new Size( 180, 22 ),
+						Text = type.ToString()
+					};
+					typeItem.Click += typeToolStripMenuItem_Click;
+					filterTypeToolStripMenuItem.DropDownItems.Add( typeItem );
+				}
+				allToolStripMenuItem.Checked = true;
+				StatusStripUpdate( $"Finished loading {assetsManager.assetsFileList.Count} files with {assetListView.Items.Count} exportable assets." );
+				treeSearch.Select();
+				
+			Debug.Write( "Task has finished\n" );
+			} ) );
+
+
+			await Task.Factory.FromAsync( async, Complete );
+		}
+		void Complete( IAsyncResult result )
+		{
+			// All done
+			// Decrement semaphore and countdown
+			//if ( oneBundleSemaphore != null )
+			{
+				//oneBundleSemaphore.Release();
+			}
+			//if ( allBundlesCountdown != null )
+			//	allBundlesCountdown.Signal();
+		}
+
 
         private void typeToolStripMenuItem_Click(object sender, EventArgs e)
         {
