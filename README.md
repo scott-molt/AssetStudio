@@ -24,7 +24,7 @@ AssetStudio is a tool for exploring, extracting and exporting assets and assetbu
 ## Usage
 ### Requirements
 
-- [.NET Framework 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=17718)
+- [.NET Framework 4.5](https://www.microsoft.com/en-us/download/details.aspx?id=40779)
 - [Microsoft Visual C++ 2013 Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=40784)
 - [Microsoft Visual C++ 2015 Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=53840)
 
