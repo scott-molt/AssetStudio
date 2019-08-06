@@ -31,7 +31,8 @@ AssetStudio is a tool for exploring, extracting and exporting assets and assetbu
 ### How to use
 
 * Use **File-Load file**, **File-Load folder** to load assets or assetbundles from multiple files or folder  
-* Use **File-Extract file**, **File-Extract folder** to export assetbundles to assets from multiple files or folder  
+* Use **File-Extract file**, **File-Extract folder** to export assetbundles to assets from multiple files or folder
+* Use **File-Filesize by Type in folder** to get a debug log of filesizes in a folder
 * Export assets: use **Export** menu  
 * Export model:  
   * Export model from "Scene Hierarchy" using the **Model** menu  
